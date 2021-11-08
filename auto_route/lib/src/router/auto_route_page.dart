@@ -180,20 +180,26 @@ class AdaptivePage<T> extends _TitledAutoRoutePage<T> {
 
   @override
   Route<T> onCreateRoute(BuildContext context) {
-    if (kIsWeb) {
-      return PageRouteBuilder<T>(
-        pageBuilder: (_, __, ___) => buildPage(context),
-        settings: this,
-        maintainState: maintainState,
-        fullscreenDialog: fullscreenDialog,
-      );
-    }
-
-    final platform = Theme.of(context).platform;
-    if (platform == TargetPlatform.iOS || platform == TargetPlatform.macOS) {
+    // Cupertino page route only on native mobile iOS.
+    if (!kIsWeb &&
+        Theme.of(context).platform == TargetPlatform.iOS &&
+        MediaQuery.of(context).size.width < 1024) {
       return _PageBasedCupertinoPageRoute<T>(page: this);
     }
-    return _PageBasedMaterialPageRoute<T>(page: this);
+
+    return PageRouteBuilder<T>(
+      pageBuilder: (_, __, ___) => buildPage(context),
+      settings: this,
+      opaque: true,
+      transitionDuration: Duration(milliseconds: 300),
+      reverseTransitionDuration: Duration(milliseconds: 300),
+      barrierColor: null,
+      barrierDismissible: false,
+      barrierLabel: null,
+      transitionsBuilder: TransitionsBuilders.fadeIn,
+      fullscreenDialog: fullscreenDialog,
+      maintainState: maintainState,
+    );
   }
 }
 
